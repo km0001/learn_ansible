@@ -7,4 +7,6 @@
 [file_servers]
 192.168.0.111
 
+[workstations]
+192.168.0.100
 
