@@ -1,30 +1,17 @@
-- name: install apache, php package Fedora server
-  tags: apache, httpd, fedora 
-  dnf:
+- name: install apache, php packages
+  tags: apache, httpd, php 
+  package:
     name: 
-      - httpd
-      - php
+      - "{{ apache_package_name }}"
+      - "{{ php_package_name }}"
     state: latest
-    update_cache: yes
-  when: ansible_distribution == "Fedora"
 
-- name: start httpd (Fedora)
-  tags: apache, fedora, httpd
+- name: start and enable apache service
+  tags: apache, httpd
   service:
-    name: httpd
+    name: "{{ apache_service }}"
     state: started
     enabled: yes
-  when: ansible_distribution == "Fedora"
-
-- name: install apache, php package ubuntu server
-  tags: apache, apache2, ubuntu 
-  apt:
-    name: 
-      - apache2
-      - libapache2-mod-php
-    state: latest
-    update_cache: yes
-  when: ansible_distribution == "Ubuntu"
 
 # Line in command
 - name: change email address for admin file
@@ -32,16 +19,9 @@
   lineinfile: 
     path: /etc/httpd/conf/httpd.conf
     regexp: '^ServerAdmin'
-    line: ServerAdmin keithjmckinnon@gmai.com
+    line: ServerAdmin keithjmckinnon@gmaiasdfl.com
   when: ansible_distribution == "Fedora"
-  register: httpd
-
-- name: restart httpd (fedora)
-  tags: apache, fedora, httpd
-  service:
-    name: httpd
-    state: restarted
-  when: httpd.changed 
+  notify: restart_apache
 
 #copy files
 - name: copy default html file for site
