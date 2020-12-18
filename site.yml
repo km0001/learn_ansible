@@ -20,117 +20,25 @@
 
 - hosts: all
   become: true
-  tasks: 
-
-  - name: add ssh key for simone
-    tags: always
-    authorized_key:
-      user: simone
-      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF5ONvBt2sVUjuTPPeDZdgktYaeZSbzaIxzhozj2Lvh1 ansible"
-
-      
+  roles:
+    - base
+    
 - hosts: workstations
   become: true
-  tasks:
-
-  - name: install unzip
-    package:
-      name: unzip
-    
-  - name: install terraform
-    unarchive:
-      src: https://releases.hashicorp.com/terraform/0.14.2/terraform_0.14.2_linux_amd64.zip
-      dest: /usr/local/bin
-      remote_src: yes
-      mode: 0755
-      owner: root
-      group: root         
-    
+  roles:
+    - workstations
+ 
 - hosts: web_servers
   become: true
-  tasks:
-
-  - name: install apache, php package Fedora server
-    tags: apache, httpd, fedora 
-    dnf:
-      name: 
-        - httpd
-        - php
-      state: latest
-      update_cache: yes
-    when: ansible_distribution == "Fedora"
-
-  - name: start httpd (Fedora)
-    tags: apache, fedora, httpd
-    service:
-      name: httpd
-      state: started
-      enabled: yes
-    when: ansible_distribution == "Fedora"
-
-  - name: install apache, php package ubuntu server
-    tags: apache, apache2, ubuntu 
-    apt:
-      name: 
-        - apache2
-        - libapache2-mod-php
-      state: latest
-      update_cache: yes
-    when: ansible_distribution == "Ubuntu"
-
-# Line in command
-  - name: change email address for admin file
-    tags: apache, fedora, httpd
-    lineinfile: 
-      path: /etc/httpd/conf/httpd.conf
-      regexp: '^ServerAdmin'
-      line: ServerAdmin keithjmckinnon@gmai.com
-    when: ansible_distribution == "Fedora"
-    register: httpd
-
-  - name: restart httpd (fedora)
-    tags: apache, fedora, httpd
-    service:
-      name: httpd
-      state: restarted
-    when: httpd.changed 
-
-#copy files
-  - name: copy default html file for site
-    tags: apache, apache2, httpd
-    copy:
-      src: default_site.html
-      dest: /var/www/html/index.html
-      owner: root
-      group: root
-      mode: 0644
-#
+  roles:
+    - web_servers
+ 
 - hosts: db_servers
   become: true
-  tasks:
-
-  - name: install maria package (Fedora)
-    tags: fedora, db, mariadb
-    dnf:
-      name: mariadb
-      state: latest
-    when: ansible_distribution == "Fedora"
-
-  - name: install maria package (Ubuntu)
-    tags: ubuntu, db, mariadb
-    apt:
-      name: mariadb-server
-      state: latest
-    when: ansible_distribution == "Ubuntu"
-
-#
+  roles:
+    - db_servers
+ 
 - hosts: file_servers
   become: true
-  tasks:
-
-  - name: install samba package
-    tags: samba
-    package:
-      name: samba
-      state: latest
-
+  roles:
+    - file_servers 
